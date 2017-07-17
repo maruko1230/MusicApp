@@ -9,7 +9,6 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.loop.yale.east.musicapp.Contents.MusicContents
 import com.loop.yale.east.musicapp.Contents.MusicItem
 
 import com.loop.yale.east.musicapp.R
@@ -25,11 +24,10 @@ import com.loop.yale.east.musicapp.R
  * Mandatory empty constructor for the fragment manager to instantiate the
  * fragment (e.g. upon screen orientation changes).
  */
-class ArtistFragment : Fragment() {
+class PlayListFragment(val playList: MutableList<MusicItem>) : Fragment() {
     // TODO: Customize parameters
     private var mColumnCount = 1
-    private var mListener: OnArtistListFragmentInteractionListener? = null
-
+    private var mListener: OnPlayListFragmentInteractionListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,27 +38,26 @@ class ArtistFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_artist_list, container, false)
+                              savedInstanceState: Bundle): View? {
+        val view = inflater.inflate(R.layout.fragment_songlist_list, container, false)
 
         // Set the adapter
         if (view is RecyclerView) {
             val context = view.getContext()
             val recyclerView = view
             if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(LinearLayoutManager(context))
+                recyclerView.layoutManager = LinearLayoutManager(context)
             } else {
-                recyclerView.setLayoutManager(GridLayoutManager(context, mColumnCount))
+                recyclerView.layoutManager = GridLayoutManager(context, mColumnCount)
             }
-            recyclerView.setAdapter(MyArtistRecyclerViewAdapter(MusicContents.ITEMS, mListener))
+            recyclerView.adapter = MySongListRecyclerViewAdapter(playList, mListener)
         }
         return view
     }
 
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is OnArtistListFragmentInteractionListener) {
+        if (context is OnPlayListFragmentInteractionListener) {
             mListener = context
         } else {
             throw RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener")
@@ -81,9 +78,9 @@ class ArtistFragment : Fragment() {
      *
      * See the Android Training lesson [Communicating with Other Fragments](http://developer.android.com/training/basics/fragments/communicating.html) for more information.
      */
-    interface OnArtistListFragmentInteractionListener {
+    interface OnPlayListFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onArtistListFragmentInteraction(item: MusicItem)
+        fun onPlayListFragmentInteraction(item: MusicItem)
     }
 
     companion object {
@@ -92,8 +89,8 @@ class ArtistFragment : Fragment() {
         private val ARG_COLUMN_COUNT = "column-count"
 
         // TODO: Customize parameter initialization
-        fun newInstance(columnCount: Int): ArtistFragment {
-            val fragment = ArtistFragment()
+        fun newInstance(columnCount: Int, playList: MutableList<MusicItem>): PlayListFragment {
+            val fragment = PlayListFragment(playList)
             val args = Bundle()
             args.putInt(ARG_COLUMN_COUNT, columnCount)
             fragment.arguments = args

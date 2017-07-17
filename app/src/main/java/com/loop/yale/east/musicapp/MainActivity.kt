@@ -4,19 +4,18 @@ import android.Manifest
 import android.app.Fragment
 import android.arch.lifecycle.ViewModelProviders
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import com.loop.yale.east.musicapp.Contents.MusicItem
-import com.loop.yale.east.musicapp.Fragment.ArtistFragment
-import com.loop.yale.east.musicapp.Fragment.ArtistFragment.OnListFragmentInteractionListener
-import com.loop.yale.east.musicapp.Fragment.CategorySelectionFragment
-import com.loop.yale.east.musicapp.Fragment.FragmentInteractionInterface
-import com.loop.yale.east.musicapp.Fragment.MusicViewModel
+import com.loop.yale.east.musicapp.Fragment.*
+import com.loop.yale.east.musicapp.Fragment.ArtistFragment.OnArtistListFragmentInteractionListener
 
-class MainActivity : AppCompatActivity(), FragmentInteractionInterface, OnListFragmentInteractionListener{
+class MainActivity : AppCompatActivity(), FragmentInteractionInterface, OnArtistListFragmentInteractionListener{
     private val TAG = "MainActivity"
 
     private val PERMISSION_REQUEST_ID = 100
@@ -27,13 +26,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractionInterface, OnListFr
         CATEGORY,
         ALBUM,
         ARTIST,
+        PLAYLIST,
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mMusicViewModel = ViewModelProviders.of(this).get(MusicViewModel::class.java)
         setContentView(R.layout.activity_main)
-        switchFragment(FRAGMENT_LIST.CATEGORY)
+        switchFragment(create(FRAGMENT_LIST.CATEGORY))
     }
 
     override fun onResume() {
@@ -44,13 +44,23 @@ class MainActivity : AppCompatActivity(), FragmentInteractionInterface, OnListFr
         }
     }
 
-    fun switchFragment(nextFragment: FRAGMENT_LIST) {
+    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+        super.onSaveInstanceState(outState, outPersistentState)
+     /*   val transaction = supportFragmentManager.beginTransaction()
+        transaction.detach().attach(activeFrag).commit()*/
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+    }
+
+    fun switchFragment(fragment: Fragment) {
         val fragManager = fragmentManager
         val fragmentTransaction = fragManager.beginTransaction()
-        val fragment = FragmentFactory.create(nextFragment)
 
         if (fragment != null) {
             fragmentTransaction.replace(R.id.fragment_container, fragment)
+            fragmentTransaction.addToBackStack(null)
             //fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
             fragmentTransaction.commit()
         } else {
@@ -59,24 +69,35 @@ class MainActivity : AppCompatActivity(), FragmentInteractionInterface, OnListFr
     }
 
     companion object FragmentFactory {
-        fun create(nextFragment: FRAGMENT_LIST): Fragment? {
-            var fragment: Fragment? = null
+        fun create(nextFragment: FRAGMENT_LIST): Fragment {
+            var fragment: Fragment = CategorySelectionFragment()
             when(nextFragment) {
                 FRAGMENT_LIST.CATEGORY -> fragment = CategorySelectionFragment()
                 FRAGMENT_LIST.ARTIST -> fragment = ArtistFragment()
             }
             return fragment
         }
+
+        fun createArtist(): Fragment {
+            val fragment = ArtistFragment()
+            return fragment
+        }
+
+        fun createPlayList(playList: MutableList<MusicItem>): Fragment {
+            val fragment = PlayListFragment(playList)
+            return fragment
+        }
     }
 
     override fun onFragmentInteraction(nextFragment: FRAGMENT_LIST) {
         Log.e("XXXXX", "onFragmentInteraction: " + nextFragment.name)
-        switchFragment(nextFragment)
-
+        switchFragment(create(nextFragment))
     }
 
-    override fun onListFragmentInteraction(item: MusicItem) {
-        Log.e(TAG, "item is selected: " + item.title)
+    override fun onArtistListFragmentInteraction(item: MusicItem) {
+        Log.e(TAG, "item is selected: " + item.artist)
+        val playList = mMusicViewModel?.getArtistList(item.artist)
+
     }
 
     fun checkPermission(): Boolean {
@@ -109,5 +130,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractionInterface, OnListFr
                 }
             }
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        Log.e(TAG, "Configuration Changed")
     }
 }

@@ -2,9 +2,7 @@ package com.loop.yale.east.musicapp.Fragment
 
 import com.loop.yale.east.musicapp.MainActivity.FRAGMENT_LIST
 
-/**
- * Created by tatsuhiko on 2017/07/15.
- */
+
 interface FragmentInteractionInterface {
 
     /**

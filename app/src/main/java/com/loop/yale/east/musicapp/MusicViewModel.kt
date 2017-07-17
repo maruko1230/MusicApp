@@ -1,7 +1,6 @@
-package com.loop.yale.east.musicapp.Fragment
+package com.loop.yale.east.musicapp
 
 import android.arch.lifecycle.ViewModel
-import android.content.ContentProvider
 import android.content.Context
 import android.os.Handler
 import android.os.HandlerThread
@@ -10,11 +9,7 @@ import android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 import android.util.Log
 import com.loop.yale.east.musicapp.Contents.MusicContents
 import com.loop.yale.east.musicapp.Contents.MusicItem
-import java.util.concurrent.ExecutorService
 
-/**
- * Created by tatsuhiko on 2017/07/15.
- */
 
 class MusicViewModel(): ViewModel() {
 
@@ -41,6 +36,16 @@ class MusicViewModel(): ViewModel() {
                 (mBackgroundThreadHandler as Handler).post(MediaStoreLoader(context))
             }
         }
+    }
+
+    fun getArtistList(artist: String): ArrayList<MusicItem> {
+        val artistList = ArrayList<MusicItem>()
+        for (item: MusicItem in MusicContents.ITEMS) {
+            if (artist.equals(item.artist)) {
+                artistList.add(item)
+            }
+        }
+        return artistList
     }
 
     inner class MediaStoreLoader(val context: Context): Runnable {

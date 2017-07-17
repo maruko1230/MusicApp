@@ -1,7 +1,6 @@
 package com.loop.yale.east.musicapp.Fragment
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.app.Fragment
 import android.arch.lifecycle.ViewModelProviders
@@ -13,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import com.loop.yale.east.musicapp.MainActivity
 import com.loop.yale.east.musicapp.MainActivity.FRAGMENT_LIST
+import com.loop.yale.east.musicapp.MusicViewModel
 
 import com.loop.yale.east.musicapp.R
 
